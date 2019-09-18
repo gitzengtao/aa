@@ -1,0 +1,58 @@
+开机动画效果
+/etc/motd
+
+
+history
+history -c : 清空历史命令
+!n
+
+!cat 执行最近一条的cat开头的命令
+
+ln -s /etc/redhat-release /abc
+
+获取命令帮助
+方式:利用 --help 帮助
+
+数字5标识的帮助类型,配置文件类型帮助信息
+man 5 passwd
+
+安装zip
+yum -y install zip
+
+解压
+unzip -d
+
+scp=cp+ssh
+scp /linux-soft/01/tools.tar.gz root@192.168.4.7:/root
+
+createrepo /tools/other
+
+make默认最小化安装
+rpm包:yum rpm -ivh
+源码包:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

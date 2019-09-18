@@ -1,0 +1,116 @@
+                   iscsi共享存储
+安装targetcli安装包
+yum -y install targetcli
+rpm -q targetcli
+
+服务端软件:http(提供服务)
+客户端软件:firefox(访问服务)
+网络SCSI借口(默认端口:3260)
+
+运行targetcli进行配置
+targetcli	#进入配置模式
+1.生成backstores,后端存储
+2.iscsi
+3.lun,逻辑单元
+iscsi/iqn.2018-08.com.example:dc/tpg1/luns create /backstores/block/nsd
+4.设置访问控制:设置客户端声称的名字
+5.设置服务端的那个IP地址上提供服务,以及开放端口
+
+systemctl restart target
+systemctl enable target
+
+客户端
+安装软件包:iscsi-initiator utils
+
+yum可以补全包名:
+1.当前系统没有安装此软件
+2.必须有缓存
+yum repolist
+yum -y install isc(补全)
+如果拥有32位和64位,会默认使用64位的包
+
+设置客户端声称的名字
+vim /etc/iscsi/initiatorname.iscsi
+
+客户端刷新声称名字的服务
+systemctl restart iscsid
+
+iscsi(主服务)-->iscsid(子服务)
+
+发现服务端共享存储
+man iscsiadm
+进入后/example查找
+iscsiadm --mode discoverydb --type sendtargets --portal 172.25.0.11 --discover
+
+
+总结:
+1.防火墙默认区域设置为trust
+
+Mariadb
+数据库服务基础
+数据库:存放数据的仓库,管理数据的一个软件
+结构:数据库里有很多的库,每一个库中有很多的表格
+
+部署mariadb数据库服务器
+maria-server:提供服务端有关的系统程序
+mariadb:提供客户端及管理工具
+
+systemctl restart mariadb
+
+不支持tab键,都以;结尾
+
+show databases;		#查看所有库
+create database nsd;	#创建nsd库
+drop database nsd;	#删除nsd库
+
+use mysql;		#切换到mysql库
+show tables;	#查看当前库中的所有表格
+
+在Linux命令行,设置数据库管理员密码
+数据库管理员:root对数据最高权限,用户信息存放mysql库user
+表
+系统管理员:root对系统最高权限,用户信息存放/etc/passwd
+
+mysqladmin [-u 用户名] [-p旧密码]
+mysqladmin -u root password '123456' 
+已知旧密码修改新密码
+mysqladmin -u root -p123456 password '123'
+
+交互式登录
+mysql -u root -p
+Enter password:
+
+非交互式登录:
+mysql -u root -p123
+
+迫不得已操作
+yum remove mariadb-server
+
+数据库Mariadb的主配置文件/etc/my.cnf
+
+表格的操作:增(insert) 删(delete) 改(update) 查(select)
+表记录
+表字段
+
+select 格式:select 表字段 from 表名;
+
+有条件查询where 表字段=值
+
+select * from base where password='123';
+select * from base where id='5';
+
+desc 表名
+
+grant 权限列表 on 数据库名,表名 to 用户名@
+
+
+flush privileges;	#刷新user表
+
+
+
+
+
+
+
+
+

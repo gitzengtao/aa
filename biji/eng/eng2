@@ -1,0 +1,99 @@
+SELinux的运行模式
+enforcing(强制),permossove(宽松)
+disable(彻底禁用)
+
+任何模式切换到disables都要经历重启系统
+
+切换运行模式
+临时切换:setence 1|0   #只影响当前系统此次开机
+固定配置:/etc/selinux/conf #永久配置文件,每次开机默认的状态
+查看SELinux状态:getenforce
+更改完配置重启才能生效,开机会读取配置文件
+修改了配置文件,也还需临时设置selinux的模式
+
+
+alias 
+影响指定用户的bash解释环境
+~/.bashrc,每次开启bash终端时生效
+影响所有用户的bash解释环境
+/etc/bashrc,每次开启bash终端时生效
+unalias 取消已设置的别名
+
+防火墙策略管理
+虚拟机server:构建web服务器
+web服务:提供一个网页内容
+http协议:超文本传输协议
+实现web服务的软件:httpd,nginx,tomcat
+
+安装httpd软件
+yum -y install httpd
+
+重启httpd软件(httpd服务)
+systemctl restart httpd
+firefox ip #测试访问
+
+页面文件默认存放路径:/var/www/html
+<marquee><font color=red><h1>hello world
+
+
+构建FTP服务器
+FTP:文件传输协议
+软件:vsftpd
+yum -y install vsftpd
+systemctl restart vsftpd
+
+默认共享数据的路径:/var/ftp
+
+数据包:源IP地址 目标IP地址 数据
+
+firewall-cmd --zone=public --add-service=ftp
+firewall-cmd --zone=public --list-all 
+
+永久(--permanent)
+下一次开机读取生效
+
+firewall-cmd --reload
+重启防火墙
+
+
+制作交换空间
+格式化swap文件系统
+mkswap /dev/vdb1 #格式化交换文件系统
+blkid /dev/vdb1  #查看文件系统类型
+不需要访问点
+启用swap分区
+[root@server0 ~]# swapon -s
+文件名				类型		大小	已用	权限
+/dev/vdb1                              	partition	2097148	0	-1(优先级)
+/dev/vdb2                              	partition	2097148	0	-2
+
+优先级,越大越优先
+开机自动启用
+vim /etc/fstab
+/dev/vdb1 swap swap defaults 0 0
+swapoff /dev/vdb1 #关闭swap分区
+swapon -a  #专用于检测交换分区
+swapon -s  #查看swap分区是否启用
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

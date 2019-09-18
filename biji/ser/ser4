@@ -1,0 +1,16 @@
+vim
+
+命令模式	插入模式(编辑模式)	末行模式
+
+左下角提示[新文件] 表示成功创建文件
+左下角提示[新目录] 表示创建失败
+
+
+[root@A ~]# tail -1 /etc/shadow
+nsd06:$6$132wUEZd$RBEZlHkmMeemcx5zDOOrAeHdqj0oKTuGgkxwS.
+uDzjOYccEVDVu41YIlMFKwNCqPmn4TfkCTk4Hun
+whVIIqTP/:18111:0:99999:7:::
+
+用户名:密码:时间戳:剩余时间:提前提醒时间:承认用户身份
+
+

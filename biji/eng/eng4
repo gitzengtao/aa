@@ -1,0 +1,124 @@
+		NFS,Network File System,网络文件系统
+为客户机提供共享使用的文件夹
+协议:NFS(TCP/UDP 2049) RPC(TCP/UDP 111)
+所需软件包: nfs-utils
+系统服务:nfs-server
+
+服务端:
+创建共享目录
+vim /etc/exports
+文件夹路径  客户机地址(权限) 客户机地址(权限) .. ..
+/public   *(ro)
+
+systemctl restart nfs-server #重启服务加载配置文件
+
+客户端:
+mkdir /mnt/nsd
+mount 172.25.0.11:/public /mnt/nsd/
+
+df -h 只显示挂载一个
+
+df -ah 查看全部
+
+开机自动挂载
+172.25.0.11:/student /mnt/aa nfs defaults,_netdev 0 0
+_netdev:声明网络设备
+
+web通信基本
+Hyper text markup language (html),超文本标记语言
+Hyper text transfer protocol(http),超文本传输协议
+
+html(书写网页内容) http(传输页面内容)
+
+
+/etc/httpd/conf/httpd.conf(主配置文件)
+/etc/httpd/conf.d/*.conf(调用配置文件)
+
+默认端口:80
+servername:本站点注册的DNS名称
+
+DocumentRoot:网页文件的跟目录(/var/www/html)
+网络路径(浏览器输入的路径)与实际路径(服务端存放页面的路径)
+
+虚拟web主机(软件级虚拟化)
+为每个虚拟站点天界配置(容器类型的配置方式)
+<VirtualHost IP地址:端口>  中间不能有空格    可以全部小写
+ ServerName  此站点的DNS名称
+ DocumtntRoot 此站点的根目录
+</VirtualHost>
+
+一旦使用了虚拟主机
+
+
+父目录定于访问控制,子目录自动继承
+
+SELinux访问控制
+会限制访问/下的目录
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

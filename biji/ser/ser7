@@ -1,0 +1,94 @@
+LVM逻辑卷管理
+1.整合分散的空间 2.空间可以扩大
+
+将众多的物理卷(PV),组合成卷组(VG),逻辑卷(LV)
+
+
+文件系统的扩大(刷新文件系统)
+resize2fs:用于ext4文件系统
+xfs_growfs:用于xfs文件系统
+
+ext4支持变小  xfs不支持变小
+
+卷组划分空间单位:PE 默认大小为4M
+删除逻辑卷:首先删除逻辑卷,然后删除卷组,最后删除物理卷(可删可不删)
+
+删除卷组前提:基于次卷组
+
+find 目录 -name
+find 目录 -type (f,d,l)
+find 目录 -type (f,d,l) [-a|-o] -name ""
+-a:和  -o:或
+find 目录 -size 10M		按大小查找
+find 目录 -user student	按用户查找
+-mtime 根据文件修改时间,都是过去时间
++10:10天之前  -10:最近十天之内  
+
+/proc:不占用硬盘空间,占用内存空间
+find只能查找硬盘的数据,不能查找内存中的数据
+双参数命令不支持管道的用法
+
+^$:匹配空行
+grep -v ^$ /etc/default/useradd
+取反,不要空行
+
+grep -v ^# /etc/login.defs | grep -v ^$ 
+显示配置问价你的有效信息(去掉以#开头的注释行信息和空行)
+
+NTP服务器:虚拟机classroom
+安装chrony软件
+vim /etc/chrony.conf
+server classroom.example.com iburst
+iburst:快速同步
+
+重启程序(服务)
+程序名(服务名):chronyd
+
+程序名最后面的daemon
+古希腊神话的半神半人精灵(守护神)
+
+systemctl restart chronyd 重启服务
+systemctl enable chronyd  开机自启动
+
+重启服务,
+同步时间需要几秒
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,58 @@
+SELinux 安全上下文(标签起到标识) 布尔值 非默认端口的开放
+semanage --help
+semanage fcontext -l | less
+ls -Zd /var/www
+
+方式1:参照标准目录,重设新目录的属性
+chcon [-R] --reference=模板目录 新目录
+
+安装mod_wsgi软件,专门翻译python代码
+yum -y install mod_wgsi
+
+添加
+wsgiscriptalias / /var/www/abc03/webinfo.wsgi
+
+
+LNMP:linux nginx mysql/mariadb python/php
+
+semanage port -a -t http_port_t -p tcp 8909
+vim /etc/httpd/conf.d/nsd01.conf 
+firefox webapp0.example.com:8909
+
+
+:set nu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

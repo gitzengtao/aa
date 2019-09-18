@@ -1,0 +1,128 @@
+软件管理
+挂载光盘	从互联网下载
+
+虚拟机classroom提供7.0光盘内容
+http://classroom.example.com/content/rhel7.0/x86_64/dvd/Packages/
+
+命令行下载工具
+使用wget下载
+wget 软件包的URL网址
+wget 软件包的URL网址 -O /目录路径/新文件名
+
+rpm命令管理软件包
+rpm -q 软件名	#查询当前系统是否安装软件
+rpm -ivh 软件名-版本信息.rpm   #安装软件包
+rpm -e 软件名	#卸载软件
+
+导入redhat的签名信息
+wget http://classroom.example.com/content/rhel7.0/x86_64/dvd/RPM-GPG-KEY-redhat-release
+导入签名包
+rpm --import /root/RPM-GPG-KEY-redhat-release 
+
+服务端:虚拟机classroom
+光盘中众多的软件包
+仓库数据文件(光盘内容有repodata)
+
+
+yum
+[ ]名字不能有空格和中文
+name代表着描述信息
+后面四行没有顺序要求
+
+硬盘里面是真空的
+lsblk #显示当前系统识别的所有硬盘
+分区模式:MBR  GPT
+MBR主引导记录分区模式,最大空间支持2.2TB
+GPT最大空间支持18EB  1EB=1024PB 1PB=1024TB
+
+格式化:富裕空间文件系统的过程
+文件系统:空间存储数据的规则
+
+ext4优势存储个数比较多,个数不大
+xfs优势对单个文件比较快
+
+df -h #正在挂载使用的分区,空间使用的情况
+
+开机自动挂载
+配置/etc/fstab
+设备路径 	挂载点 	类型 	参数 	备份标记 检测顺序
+/dev/vdb1    /mypart1    ext4 rw,acl  SUID,SGID
+				    defaults 0(不备份) 0(不检测)
+备份和dump有关
+检测扇区文件系统是否完整,开机会延迟,只有/分区需要检测
+
+partprobe 刷新分区表
+
+识别硬盘lsblk
+分区fdisk
+刷新分区表partprobe
+格式化文件系统 mkfs.ext4 mkfs.xfs blkid
+
+    – 命令模式下移动光标：键盘上下左右键、Home键、End键
+    – 命令模式下行间跳转：到全文的第一行（1G或gg）、到全文的最后一行（G）、到全文的第10行（10G）
+    
+    – 命令模式下复制、粘贴：
+    	 复制1行（yy）、复制3行（3yy）
+    	 粘贴到当前行之后（小写p）
+
+    – 命令模式下删除：
+    	 删除单个字符（x）
+    	 删除到行首（d^）、删除到行尾（d$）
+    	 删除1行（dd）、删除3行（3dd）
+         
+    
+    – 命令模式下查找关键词： 
+    	 搜索（/word）切换结果（n向下一个目标移动、N向上一个目标移动）
+
+    – 补充：在命令模式下大写的C，可以删除光标之后，并且进入输入模式
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

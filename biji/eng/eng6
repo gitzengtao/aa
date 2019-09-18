@@ -1,0 +1,81 @@
+配置IPV6地址
+
+IPv4地址:32个二进制组成,点分十进制
+
+IPv6地址:128个二进制组成,用冒号进行分隔8个部分 转化成16进制
+
+
+con-name:config name
+ifname:ifconfig name
+生成虚拟网卡team0 参考man teamd.conf
+
+parted分区工具
+MBR分区模式;	fdisk分区工具
+主分区 扩展分区 逻辑分区
+最多只能有4个分区
+支持空间大小2.2TB
+
+GPT分区模式:	parted分区工具
+最多只能有128个主分区
+支持空间大小18EB
+
+邮件服务器
+yum -y install postfix
+vim /etc/postfix/main.cf
+99  myorigin = server0.example.com
+116 inet_interfaces = all
+164 mydestination = server0.example.com
+
+创建本地用户作为邮箱的账号
+
+mail 发信操作: mail -s 发件人 收件人
+
+vim /etc/samba/smb.conf
+selinux
+
+客户端:
+yum -y install cifs-utils
+mount //对方IP/目录  
+vim /etc/fstab
+//172.25.0.11/abc /mnt cifs defaults,user=harry,pass=123,_netdev 0 0
+
+
+selinux布尔值(功能的开关)
+
+setsebool samba_export_all_ro on
+getsebool -a | grep samba
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

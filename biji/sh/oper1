@@ -1,0 +1,420 @@
+Linux 运维
+apache,Nginx,Tengine,lighttpd    用于php
+Tomcat,IBM websphere,Jboss  用于java
+
+源码()
+英语 人  解释器(bash) --> [计算机]二进制0,1
+
+英语源码 --> 编译器 --> 文件(qq.exe)
+c,java --> gcc --> nginx
+源码 --> 编译器 --> httpd.rpm包
+
+gcc nginx是用c语言写的
+pcre-deve 可以让nginx支持正则表达式
+openssl-devel 可以让nginx做加密网站
+
+nginx:是俄罗斯人编写的十分轻量级的HTTP服务器
+是一个高性能的HTTP和反向代理服务器,同时也是一个IMAP/POP3/SMTP代理服务器
+官网:http://nginx.org/
+
+nginx软件安装
+yum -y install gcc pcre-devel openssl-devel
+useradd -s /sbin/nologin nginx
+tar -zxf nginx-1.10.3.tar.gz
+cd nginx-1.10.3
+./configure \	
+--prefix=/usr/local/nginx \	#指定安装目录
+--user=nginx \			#指定账户名称
+--group=nginx \			#指定组名称
+--with-http_ssl_module		#支持加密功能
+make && make install
+
+useradd -s /sbin/nologin nginx  启动服务时用
+以root启动程序(程序会继承root的权限)
+nginx是模块化设计的软件
+100个功能100M(独立的100个模块)
+安装时,可以根据需要有选择的安装
+
+/usr/local/nginx/sbin/nginx -s reload
+不关服务,让服务器立刻生效
+前提条件是服务必须启动,命令才生效
+
+/usr/local/nginx/子目录
+conf/配置文件
+html/网页
+logs/日志
+sbin/程序
+
+查看nginx进程
+ps aux | grep nginx
+netstat -antulp | grep nginx
+
+nginx配置
+   server{
+    listen 80;
+     server_name www.example.com;
+     root "/var/local/nginx/html';
+}
+
+网站默认使用的是http协议
+http协议是明文协议
+
+源码安装Nginx时必须使用--with-http_ssl_module参数，启用加密模块，对于需要进行SSL加密处理的站点添加ssl相关指令（设置网站需要的私钥和证书）。
+加密算法一般分为对称算法、非对称算法、信息摘要。
+对称算法有：AES、DES，主要应用在单机数据加密。
+非对称算法有：RSA、DSA，主要应用在网络数据加密。
+信息摘要：MD5、sha256，主要应用在数据完整性校验。
+
+
+
+					day 2
+nginx(仅处理静态网页)
+静态网页:a.mp3 a.mp4 a.html a.jpg a.doc
+动态数据:a.php a.jsp a.sh a.py
+
+php-mysql(模块化)
+nginx配置
+如果用户访问的是静态,则找到文件直接返回
+如果用户访问的是动态,则转发给9000执行脚本,再返回
+nginx(80) mariadb(3306) 
+location匹配浏览器的地址栏(从域名后开始)     
+location /abc { deny 1.1.1.1 }
+location /test { allow 1.1;deny all }
+location /xyz { allow all }
+location / {allow all}           #优先级最低
+location ~^abc$ {xxx}  		  #location支持正则表达式
+
+
+LNMP常见问题
+Nginx的默认访问日志文件为/usr/local/nginx/logs/access.log
+Nginx的默认错误日志文件为/usr/local/nginx/logs/error.log
+PHP默认错误日志文件为/var/log/php-fpm/www-error.log
+如果动态网站访问失败，可用参考错误日志，查找错误信息。
+
+
+
+mysql -e "show databases;use mysql;show tables"
+mysql -e "select * from mysql.user\G"
+
+
+地址重写(地址栏被重写了)
+www.360buy.com-->www.jd.com
+www.baidu.com-->https://www.baidu.com
+
+rewrite 旧地址 新地址	#redirect效果可以让访问旧地址重写为新地址
+
+    server {
+        listen       80;
+        server_name  www.a.com;
+  rewrite /a.html /b.html redirect;
+	}
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+nginx(依赖包,创建用户,编译安装)
+mariadb  mariadb-server
+nginx(80)  mariadb(3306) php-fpm(9000)
+netstat -ntlup | grep nginx|mysql|php
+mysql -e "命令"
+动静分离
+	location / {
+	root html
+	}
+
+rewrite ^/(.*) http://www.tmooc.cn/$1;
+
+
+if  ($http_user_agent ~* firefox){
+        rewrite ^(.*) /firefox/$1;
+      }
+
+$http_user_agent是nginx的自带变量(用户操作系统和浏览器的信息)
+$http_user_agent=msie7.0
+$http_user_agent=Firefox36
+$http_user_agent=Chrome40
+
+curl 192.168.4.5/tt.html
+firefox 192.168.4.5/tt.html
+
+地址重写格式【总结】
+rewrite 旧地址 新地址 [选项];
+last 不再读其他rewrite
+break 不再读其他语句，结束请求
+redirect 临时重定向
+permament 永久重定向
+
+
+反向代理服务nginx
+   upstream webserver {
+        server 192.168.2.100:80 weight=2;
+        server 192.168.2.200:80;
+    }
+默认weight为1
+在location上添加webserver集群
+        location / {
+        proxy_pass http://webserver;
+            root   html;
+            index  index.html index.htm;
+        }
+
+upstream webserver {
+                server 192.168.2.100 weight=1 max_fails=1 fail_timeout=30;
+                server 192.168.2.200 weight=2 max_fails=2 fail_timeout=30;
+                server 192.168.2.101 down;
+        }
+#weight设置服务器权重值，默认值为1
+#max_fails设置最大失败次数
+#fail_timeout设置失败超时时间，单位为秒
+#down标记服务器已关机，不参与集群调度
+
+健康检查
+每隔20秒,会3次访问,如果失败
+
+ip_hash 相同客户端访问相同服务器,锁定死了
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+并发量?
+总访问量?
+有没有人处于等待的状态?几个?
+
+nginx---stub_status  模块
+
+[root@proxy nginx-1.12.2]# ./configure   \
+> --with-http_ssl_module                        //开启SSL加密功能
+> --with-stream                                //开启TCP/UDP代理模块(四层调度)
+> --with-http_stub_status_module                //开启status状态页面
+[root@proxy nginx-1.12.2]# make && make install    //编译并安装
+
+[root@proxy ~]# curl 192.168.4.5/ss
+Active connections: 1 
+server accepts handled requests
+ 6 6 18 
+Reading: 0 Writing: 1 Waiting: 0 
+
+
+Active connections：当前活动的连接数量。
+Accepts：已经接受客户端的连接总数量。
+Handled：已经处理客户端的连接总数量。
+（一般与accepts一致，除非服务器限制了连接数量）。
+Requests：客户端发送的请求数量。
+Reading：当前服务器正在读取客户端请求头的数量。
+Writing：当前服务器正在写响应信息的数量。
+Waiting：当前多少客户端在等待服务器的响应。
+
+ab -c 100 -n 100 http://192.168.4.5/
+-c  模拟人数
+-n  模拟总访问次数
+相关的软件包httpd-tools
+大于1024的数量会报错
+
+worker_processes  1;
+和CPU的内核数量一致
+
+vim /etc/security/limits.conf
+*               soft    nofile          10000
+*               hard    nofile          10000
+#用户或组    硬限制或软限制    需要限制的项目   限制的值
+
+浏览器本地缓存静态数据
+在Firefox地址栏内输入about:cache将显示Firefox浏览器的缓存信息
+
+        location ~ \.(jpg|png|gif|mp4)$ {
+                expires 30d;
+        }
+缓存30天
+
+nginx日志切割
+
+kill -USR1 $(cat /usr/local/nginx/logs/nginx.pid)
+
+
+[root@proxy ~]# crontab -e
+03 03 * * 5  /usr/local/nginx/logbak.sh
+
+修改Nginx配置文件
+[root@proxy ~]# cat /usr/local/nginx/conf/nginx.conf
+http {
+.. ..
+gzip on;                            //开启压缩
+gzip_min_length 1000;                //小文件不压缩
+gzip_comp_level 4;                //压缩比率(1~9)
+gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+                                    //对特定文件压缩，类型参考mime.types
+.. ..
+}
+
+mime.types  文件在/usr/local/nginx/conf里
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+memcached(KV数据库)
+key=value
+854651684612561231564=tom,logined:true
+
+yum -y install memcached telnet
+
+telnet是用于连接这个数据库
+
+ss     等于netstat (在rhel7版本以上)
+选项功能和作用是一样的
+
+google-chrome 192.168.2.100/index.php
+用谷歌访问
+
+httpd,nginx,(PHP python)网站
+LAMP,PNMP
+
+tomcat(apache),weblogic(oricle),websphere(IBM),jboss(redhat)
+tomcat不用钱,其他软件需要付费
+
+JDK
+包括整个java的核心
+包括java运行环境
+
+JRE
+java虚拟机(jvm)
+java核心
+
+shell[调用]
+python[调用模块]
+java[调用类库]
+
+
+yum -y install  java-1.8.0-openjdk                //安装JDK
+java -version                                    //查看JAVA版本
+
+netstat -nutlp |grep java        //查看java监听的端口
+
+如果检查端口时，8005端口启动非常慢，默认tomcat启动需要从/dev/random读取大量的随机数据，默认该设备生成随机数据的速度很慢，可用使用下面的命令用urandom替换random（非必须操作)
+重启之后需要重新执行
+mv /dev/random  /dev/random.bak
+ln -s /dev/urandom  /dev/random
+
+也可以安装rng-toolsr软件包
+yum install rng-tools
+systemctl start rngd
+systemctl enable rngd
+
+java严格区分大小写
+
+/usr/local/tomcat/bin/startup.sh 
+Using CATALINA_BASE:   /usr/local/tomcat
+Using CATALINA_HOME:   /usr/local/tomcat
+Using CATALINA_TMPDIR: /usr/local/tomcat/temp
+Using JRE_HOME:        /usr
+Using CLASSPATH:       /usr/local/tomcat/bin/bootstrap.jar:/usr/local/tomcat/bin/tomcat-juli.jar
+Tomcat started.
+以上显示信息不准确,需要使用netstat或ss命令查看端口
+
+
+<Context path="/test" docBase="/var/www/html/" />
+页面跳转
+
+tomcat
+加密的实验做一次,所有的网站都加密
+
+
+tomcat+java
+nginx+PHP|python
+
+varnish(缓存服务器)加速
+CDN内容分发网络
+client-----proxy-----web1
+
+部署Varnish缓存服务器
+yum -y install gcc readline-devel pcre-devel python-docutils 
+
+useradd -s /sbin/nologin varnish
+tar -xf varnish-5.2.1.tar.gz
+cd varnish-5.2.1
+./configure
+make && make install
+cp  varnish-5.2.1/etc/example.vcl   /usr/local/etc/default.vcl
+修改代理配置文件
+vim  /usr/local/etc/default.vcl
+backend default {
+     .host = "192.168.2.100";
+     .port = "80";
+ }
+启动服务
+[root@proxy ~]# varnishd  -f /usr/local/etc/default.vcl
+//varnishd命令的其他选项说明如下：
+//varnishd -s malloc,128M        定义varnish使用内存作为缓存，空间为128M
+//varnishd -s file,/var/lib/varnish_storage.bin,1G 定义varnish使用文件作为缓存
+
+varnishlog                        //varnish日志
+varnishncsa                    //访问日志
+
+varnishadm  			//实现快速更改
+varnish> ban req.url ~ .*
+//清空缓存数据，支持正则表达式
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+版本控制软件
+集中式版本控制(最新版本)
+CVS SVN 
+分布式版本控制(各种版本)
+Git BitKeeper(收费)
+
+1.仅下载最新版本
+2.修改代码
+3.上传服务(备份老的数据,上传新数据)
+
+1.下载代码(对服务器的完整克隆)
+2.修改代码
+3.上传到本地备份
+4.上传远程服务器
+
+Git(开源)作者linus
+
+windows 有2千人
+git 有上万人
+全世界最主流的版本控制软件
+
+git命令行
+github做成网站(被微软收购了)
+
+windows客户端
+需要安装git和tortoiseGit
+
+ssh-keygen -f /root/.ssh/id_rsa -N ''
+更适合写脚本,实现免密登录
+
+创建的服务器协议有SSH协议、Git协议、HTTP协议。
+SSH协议服务器（支持读写操作）
+[root@web1 ~]# git init --bare /var/git/base_ssh
+Initialized empty Git repository in /var/git/base_ssh/
+客户端访问
+[root@web2 ~]# git clone root@192.168.2.100:/var/git/base_ssh
+[root@web2 ~]# rm -rf base_ssh
+客户端生成SSH密钥，实现免密码登陆git服务器（web2主机操作）。
+[root@web2 ~]# ssh-keygen -f /root/.ssh/id_rsa -N ''
+[root@web2 ~]# ssh-copy-id  192.168.2.100
+[root@web2 ~]# git clone root@192.168.2.100:/var/git/base_ssh
+[root@web2 ~]# git push
+
+Git协议服务器（只读操作的服务器）
+安装git-daemon软件包
+[root@web1 ~]# yum -y install git-daemon
+[root@web1 ~]# git init --bare /var/git/base_git
+Initialized empty Git repository in /var/git/base_git/
+
+Git协议服务器（只读操作的服务器）浏览器看
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

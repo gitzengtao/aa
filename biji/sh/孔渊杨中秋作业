@@ -1,0 +1,439 @@
+1.写出5个Linux操作系统的名字
+Redhat Enterprise Linux、Fedora、Centos 、Ubuntu、Debian
+
+2.1386和x86_64 的差别
+i386 适用于intel和AMD所有32位的cpu.以及via采用X86架构的32的cpu.intel平台包括8086,80286,80386,80486,奔腾系列(1.2.3.4)、赛扬系列,Pentium D系列以及centrino P-M,core duo 
+X86_64 适用于intel的Core 2 Duo, Centrino Core 2 Duo, and Xeon 和AMD Athlon64/x2, Sempron64/x2, Duron64等采用X86架构的64位cpu.
+
+3.解释sync的功能
+同步数据,写入磁盘,主要是在关闭linux系统时候用的
+
+4.解释init 0, init 3, init 5，init 6的功能
+init 0:系统停机状态，系统默认运行级别不能设置为0，否则不能正常启动，机器关闭
+Init1:单用户工作状态，root权限，用于系统维护，禁止远程登陆，就像Windows下的安全模式登录
+Init2:多用户状态，不支持网络
+init3:完整的多用户模式，支持网络，登陆后进入控制台命令行模式
+Init4:系统未使用，保留一般不用，在一些特殊情况下可以用它来做一些事情。
+init 5:切换到图形界面
+init 6:系统正常关闭并重启，默认运行级别不能设为6，否则不能正常启动。运行init 6机器就会重启
+
+5. 某目录属性为1rwxr –xr–，请描述属性的含义，并写出修改文件属性为700的实现方法
+所有者具有读写执行权限,所属组具有读和执行权限,其他人只有读权限
+eg:chmod 700 /tmp/test || chmod u=rwx,g=rx,o=r /tmp/test
+
+6.写出一条命令，能够打印出/etc目录下包含字符串”network" 的所有文件
+]# ls /etc/*network*
+]#ls /etc/ | grep "network"
+
+7.NFS的作用
+NFS（Network File System）即网络文件系统，它允许网络中的计算机之间通过TCP/IP网络共享资源。在NFS的应用中，本地NFS的客户端应用可以透明地读写位于远端NFS服务器上的文件，就像访问本地文件一样。
+
+8.Fdisk和parted的差别
+1).parted命令可以划分单个分区大于2T的GPT格式的分区，也可以划分普通的MBR分区，fdisk命令对于大于2T的分区无法划分（大于2.2TB的存储空间用fdisk不支持，需要采用parted来分区），所以用fdisk无法看到parted划分的GPT格式的分区。
+2).fdisk最多只能划分4个主分区,或3个主分区加一个扩展分区,n个逻辑分区,所支持最大卷2T;
+parted最多支持128个主分区,支持大于2T的分区,最大达18EB 
+扩展:1EB=2^10PB 
+1PB=2^10TB
+1TB=2^10GB
+1GB=2^10MB
+1MB=2^10KB
+1KB=2^10B
+
+9.1inux如何改IP,主机名
+#]Ifconfig [网卡名] [ip地址]  //临时设置ip地址
+#]nmcli connection modify [网卡名] ipv4.method manual ipv4.address [ip地址] #]connection.autoconnect yes  //永久设置ip地址
+#]hostname [主机名]  //临时设置
+#]hostnamectl set-hostname [主机名]  //永久设置
+#]vim /etc/sysconfig/network  //通过修改配置文件设置永久主机名
+HOSTNAME=[主机名]
+
+10.Linux系统中包含主机名和ip地址映射关系的文件有哪些(至少写出两个)
+1)./etc/hosts
+2)./etc/fstab
+3)./etc/resolve.conf
+
+11.简述/etc/fstab的作用
+磁盘被手动挂在之后都必须把挂载信息写入/etc/fstab这个文件中，否则下次开机启动时仍然需要重新挂载。
+系统开机时会主动读取/etc/fstab这个文件中的内容，根据文件里面的配置挂载磁盘。这样我们只需要将磁
+盘的挂载信息写入这个文件中我们就不需要每次开机启动之后手动进行挂载了。
+
+12.请写出Linux系统故障处理流程
+报错信息--->查阅日志文件--->分析定位问题--->解决问题。
+
+13.某一天突然发现Linux 系统文件只读，该怎么办?
+1)、重启看是否可以修复（很多机器可以）
+2)、使用用 fsck – y /dev/hdc6 (/dev/hdc6指你需要修复的分区) 来修复文件系统
+3)、若在进行修复的时候有的分区会报错，重新启动系统问题依旧
+查看下分区结构
+[root@localhost ~]# mount
+/dev/sda3 on / type ext3 (rw)
+proc on /proc type proc (rw)
+sysfs on /sys type sysfs (rw)
+devpts on /dev/pts type devpts (rw,gid=5,mode=620)
+/dev/sda1 on /boot type ext3 (ro)
+tmpfs on /dev/shm type tmpfs (rw)
+none on /proc/sys/fs/binfmt_misc type binfmt_misc (rw)
+sunrpc on /var/lib/nfs/rpc_pipefs type rpc_pipefs (rw)
+查看ro挂载的分区,如果发现有ro，就重新mount
+umount /dev/sda1
+mount /dev/sda1 /boot
+如果发现有提示“device is busy”，找到是什么进程使得他busy
+fuser -m /boot 将会显示使用这个模块的pid
+fuser -mk /boot 将会直接kill那个pid
+然后重新mount即可。
+4)、直接remount，命令为
+[root@localhost ~]# mount -o rw,remount /boot
+
+14.简述raid0 raid1 raid5三种工作模式的工作原理及特点
+raid0(条带模式):同一个文档分散存放在不同磁盘并行写入  特点:效率高,至少需要两块硬盘
+raid1(镜像模式):一个文档复制成多份,分别写入不同的磁盘 特点:多份拷贝提高可靠性,效率无提升,至少需要两块硬盘
+raid5(高性价比模式):RAID5不对存储的数据进行备份，而是把数据和相对应的奇偶校验信息存储到组成RAID5的各个磁盘上，并且奇偶校验信息和相对应的数据分别存储于不同的磁盘上  特点:当RAID5的一个磁盘数据发生损坏后，利用剩下的数据和相应的奇偶校验信息去恢复被损坏的数据
+
+15.把/data目录及其子目录下所有以扩展名.txt结尾的文件中包含oldgirl的字符串全部替换为oldboy.
+]#vim test.sh
+#!/bin/bash
+for name in `ls /data | grep ".txt$"`
+do
+	sed -i 's/oldgirl/oldboy/' /data/$name
+done
+
+16.查/oldboy 下所有7天以前以log结尾的大于IM的文件移动/tmp下
+修改一个文件filea权限为文件所有者读、写、执行，同属组可读、其它组可读;
+]#find /oldboy -mtime +7 -size +1M -exec cp {} /tmp \;
+chmod 724 filea
+
+17.己知一个DNS服务器的IP地址，如何在一台普通应用服务器上配置DNS解析;
+编辑/etc/resolve.conf文件
+Nameserver [DNS:ip地址]
+
+18.将已经安装的服务vsftpd添加到开机自动启动:
+systemctl enable vsftpd
+
+19.查看系统运行的基本命令:查看系统挂载目录使用情况、CPU使用、内存使用、磁盘I0
+系统挂载目录:df -h
+CPU使用:lscpu
+内存使用:cat /proc/meminfo
+磁盘io:iotop
+
+20.该命令的作用是什么，解说一下
+  find /etc -name init* -a -type f -exec rm -rf {} \;
+删除/etc下以init开头的,并且是文本文件类型的
+
+21.一个目录下，有很多的文件，你不小心按下了rm–f,这条命令产生了什么后果?
+无法删除,会提示这个文件是一个目录
+
+22.命令行的未尾加个&是啥意思?
+将程序放在后台执行
+
+23.说说LVM有什么好处?
+空间变大,整合分散空间
+
+24.请写出Windows系统重启的命令
+shutdown -r 
+
+25.请写出Linux下挂载镜像文件rhe16.4 _x86 _64. iao到/mnt目录的命令。
+mount rhel16.4 _x86_64.iao /mnt
+
+26.关闭所有runlevel 3下的所有开机启动项，仅留下sshd, crond, network, rsyslog, syss,tat
+
+chkconfig --level 3 sshd on
+chkconfig --level 3 crond on
+chkconfig --level 3 network on
+chkconfig --level 3 rsyslog on
+chkconfig --level 3 syss on
+chkconfig --level 3 tat on
+
+27.解释SEL INUX三个等级的意思
+SEL INUX=enforcing
+强制模式
+SEL INUX=permissive
+宽松模式
+SEL INUX=disabled
+关闭模式，不使用selinux
+
+28.解释下面计划任务的意思
+a. 30 3.12*** /bin/sh/scripts/adair .sh
+不好意思,没听说过这个3.12
+b.30 */6 * * * /bin/sh/acripts/adai .sh
+每隔6小时的三十分执行这个脚本
+
+29.如果向磁盘写入数据提示如下错误No Space left on device 通过df –h查看磁盘空间,发现没满，请问可能原因是什么?
+答：磁盘报错“No space left on device”，当使用df -h 查询文件属性信息时，实际上是查的磁盘的block数量，从下面看磁盘么有满，说明有可能是磁盘的iNode满了。
+
+30.假如在执行rm– rf /tmp/aaa 时报错说rm这个文件不存在，造成这种现象的原因是什么，说出两点
+1）/bin/rm文件被删除
+2）没有定义到PATH
+
+31.过滤出/etc/services中包含3306和1521端口的行
+cat /etc/services | grep ‘3306 | 1521’
+
+32. /etc/目录为linux系统默认的配置文件及服务启动命令的目录
+a.请用tar打包/etc/整个目录(打包及压缩)到tmp下
+tar  -zcPf  /tmp/bf.tar.gz /etc/
+b,请用tar打包/etc/整个目录(打包及压缩，但需要排除/etc/services文件)到tmp下
+tar -zcPf /tmp/bf1.tar.gz  `ls /etc | grep -v ‘services’`
+
+33.找出/appl icat ion/nginx/log且在7天以前的日志，将其删除
+find /oldboy -mtime +7 -size +1M -exec cp {}  /tmp \;
+rm -rf `find /appl icat ion/nginx/log  -mtime +7`
+
+34.把/data目录及其子目录下所有以扩展名.txt结尾的文件中包含oldgirl的字符串全部替换为oldboy
+]#vim test.sh
+#!/bin/bash
+for name in `ls /data | grep ".txt$"`
+do
+	sed -i 's/oldgirl/oldboy/' /data/$name
+done
+
+35.如何设置软链接，软硬链接的区别
+ln  源文件 目标软件  //硬连接
+ln -s 源文件 目标文件  //软连接
+区别：
+软连接：软链接文件的大小和创建时间和源文件不同。软链接文件只是维持了从软链接到源文件的指向关系（从jys.soft->jys可以看出），不是源文件的内容，大小不一样。
+硬连接：硬链接文件和源文件的大小和创建时间一样。硬链接文件的内容和源文件的内容一模一样，相当于copy了一份。
+ 
+36.用ls  -l查看文件属性如下，描述显示的文件属性的含义
+drwxr-xr-x   6   lee  wheel    4096 Doc 11  2013  redis-2.6. 17
+文件类型：目录 所有者：读写执行权限 所属组读和执行权限 其他人：读和执行权限
+连接数：6(就是快捷方式)
+属主：lee
+所属组：wheel
+文件大小：4096K
+最后修改或访问时间：Doc 11  2013
+文件名：redis-2.6. 17
+
+37.请写出20个Iinux常用命令
+ls	  			
+lscpu	
+cat	
+cat   
+less	
+head	
+tail	
+grep	
+vim	
+pwd		
+cd		
+hostname	
+ifconfig	
+nmtui		
+touch		
+mkdir		
+poweroff	
+reboot	
+mount 	
+umount	
+su - [用户]	
+wget 下载
+httpd -t 
+route -n 
+
+38.telnet:把用户计算机当成远端计算机的一台终端,在远端登录后,具有和远端计算机上用户一样的权限
+   ftp:文件传输,只允许用户对远方计算机文件进行有限的操作
+
+39.文档权限755是怎么来的，具有什么权限（umask）
+755：u=rwx，g=rx，o=rx
+
+40.如何创建逻辑卷
+第一步创建卷组：vgcreate [卷组名] [设备路径]
+第二步创建逻辑卷：lvcreate -n [逻辑卷名称] -L/l [逻辑卷大小/块] [卷组名]
+
+41.DNS地址解析的过程
+　1）先向本地dns缓存查看有没有该域名对应的ip地址，有直接跳出，没有接着往下
+2）向根dns服务器询问域名对应的ip地址(根dns服务器会让他去查询顶级dns服务器)
+　3）向顶级dns服务器询问域名对应的ip地址(顶级dns服务器会让他去查询权威dns服务器)
+　　4）向权威dns服务器询问域名对应的ip地址(权威dns服务器会让他去查询二级dns服务器)
+　　5)向二级dns服务器询问域名对应的ip地址(二级dns服务器会返回对应的ip地址)
+6)接收到ip地址后，会先把ip和域名对应关系保存到本地dns缓存，以便下次方便访问
+
+42.vim中删除1000行命令；删除以大写D开头的1000行命令，并要求写出，相关命令的文字解释
+删除1000行命令：1000dd
+删除1000行以大写D开头：g/^D/d
+
+43.怎么区别虚拟机和物理机，要求windows，和linux分别写出
+Windows：
+在CMD里输入：Systeminfo | findstr /i "System Model"
+如果System Model：后面含有Virutal就是虚拟机，其他都是物理机
+或者用powershell命令：get-wmiobject win32_computersystem | fl model
+Linux：
+在bash里输入：dmidecode -s system-product-name
+或者lshw -class system
+或者dmesg | grep -i virtua
+
+44.怎么在1000台机器上查看uptime开机时间
+]#uptime
+
+45.vim中显示行号，再关闭行号的命令
+显示行号:set nu
+关闭行号:set nonu
+
+46.LS常见的使用
+ls常用参数
+     -a 显示所有文件，包含隐藏文件
+     -A  显示所有文件，包含隐藏文件，但不包含.及..
+     -l  显示为long format（长格式），列出文件的类型、权限、链接数、owner、group、大 小，时间，名字
+     -R 递归显示
+     -d 不展开目录，只显示目录自身，一般与-l配合使用以显示目录自身的属性信息（只显示当前目录的内容）
+     -1 数字1，成列显示内容
+     -S 以文件大小排序显示，默认从大到小 -r后，从小到大
+     -U 按存放顺序排序显示
+     -X 按扩展名的首字母来排序
+     -t  按mtime排序（先显示时间最近的）
+     -ul  按atime排序（先显示时间最近的）
+     -ct  按ctime排序（先显示时间最近的
+
+47.vim中的常见使用
+dd,g,G,^,$,home,end
+
+48.查看文件内容的各种命令的使用
+vim  //查看和编辑
+less //分屏显示查看
+more //分屏显示查看，不支持倒放，文件末尾自动退出
+cat //直接输出到屏幕
+tac //倒序输出文本内容
+
+49.awk与sed的常见使用
+sed [-nefri] ‘command’ 输入文本
+awk '{pattern + action}' {filenames}
+
+50.find的使用
+find [目录] [条件1] [-a|-o] [条件2] ...
+• 常用条件表示:
+	-type 类型(f文本文件、d目录、l快捷方式)
+	-name "文档名称"
+	-size +|-文件大小(k、M、G)
+	-user 用户名
+	-mtime 根据文件修改时间
+
+51.怎么区别虚拟机和物理机，要求windows，和linux分别写出
+Windows：
+在CMD里输入：Systeminfo | findstr /i "System Model"
+如果System Model：后面含有Virutal就是虚拟机，其他都是物理机
+或者用powershell命令：get-wmiobject win32_computersystem | fl model
+Linux：
+在bash里输入：dmidecode -s system-product-name
+或者lshw -class system
+或者dmesg | grep -i virtua
+
+52.vim命令  行首、行尾、删除、复制、粘贴、替换
+^行首
+$行尾
+dd删除/复制
+pp粘粘
+s/vivian/sky/ 替换
+
+53.查看文本文件内容的命令
+vim、less、cat、tac、more、head、tail
+
+54.显示当前哪个用户登陆
+who
+
+55.查看隐藏文件
+ls -a
+
+56.grep命令和find命令
+grep 模糊匹配，通常用来筛选文本内容
+find 查找文件
+
+57.动态查看文件内容
+tailf
+
+58.通配符的作用并列出
+?(单个字符),*(任意字符),[](匹配连续范围),{}(匹配集合中的任意一个)
+
+59.什么是物理内存，什么是虚拟内存
+1、物理内存是指由于安装内存条而获得的临时储存空间。主要作用是在计算机运行时为操作系统和各种程序提供临时储存。常见的物理内存规格有256M、512M、1G、2G等，当物理内存不足时，可以用虚拟内存代替。
+2、虚拟内存是计算机系统内存管理的一种技术。它使得应用程序认为它拥有连续可用的内存（一个连续完整的地址空间），它通常是被分隔成多个物理内存碎片，还有部分暂时存储在外部磁盘存储器上，在需要时进行数据交换。
+
+60.如何读取二进制文件
+hexdump [选项] [文件]...
+    -n length 只格式化输入文件的前length个字节。
+    -C 输出规范的十六进制和ASCII码。 
+    -c 单字节字符显示。 
+    -d 双字节十进制显示。
+    -o 双字节八进制显示。 
+    -x 双字节十六进制显示。
+    -s 从偏移量开始输出。 
+    -e 指定格式字符串，格式字符串包含在一对单引号中，格式字符串形如：'a/b "format1" "format2"'。
+
+61.Linux下怎么安装工具包
+rpm -ivh [包名]
+yum -y install [包名]
+
+62.Linux下如何确定电脑到路由器的连通性
+ping路由器地址
+  
+63.ping的默认发送的数据包大小，ping怎么指定发送的数据包大小
+32Byte 
+-l size
+
+64.电脑加一块硬盘，怎么让系统识别
+windows可用分区工具对硬盘进行分区 eg：DG
+linux 中fdisk或者parted 对硬盘就行分区，然后格式化，最后挂载
+
+65.linux如何挂在windows下的共享目录
+samba
+首先安装cifs协议
+mount -o -t cifs //10.1.1.123/ShareDir /tmp/Window_ShareDir username=sell1,password=XXXX 66.符号链接与硬链接的区别
+
+67.LINUX下如何tar命令压缩包和解压缩包
+tar  -z/j/JcPf [压缩名] [文件路径]
+tar -xf [压缩包] -C [解压路径]
+
+68.linux下如何看目前的运行级别，安全关机命令是什么
+运行级别：runlevel
+安全关机命令：shutdown
+
+69.如何查看磁盘空间大小（命令方式），如何用命令查看网卡的运行状态，以及网卡的配置
+磁盘空间大小：lsblk [设备路径]
+查看网卡：ifconfig [网卡名]
+
+70.文件名叫什么，放在什么目录下
+
+71.如何查看CPU，内存使用状态（命令方式）
+lscpu
+cat /proc/meminfo
+
+72.如何在linux下查找文件大小大于100M的文件并显示出来
+find / -size +100M 
+
+73.文件权限-rwxr-xr-x用数字表示为？每位数字分别代表什么？修改文件权限的命令是？
+755;4:r 2:w 1:x ;chmod
+
+74.如何查看端口8080是否被占用
+netstat -antup | grep 8080
+
+75.LINUX操作系统运行级别有哪些？
+init 0:系统停机状态，系统默认运行级别不能设置为0，否则不能正常启动，机器关闭
+Init1:单用户工作状态，root权限，用于系统维护，禁止远程登陆，就像Windows下的安全模式登录
+Init2:多用户状态，没有网络支持
+init3:完整的多用户模式，有网络，登陆后进入控制台命令行模式
+Init4:系统未使用，保留一般不用，在一些特殊情况下可以用它来做一些事情。
+init 5:图形界面.
+init 6:系统正常关闭并重启，默认运行级别不能设为6，否则不能正常启动。运行init 6机器就会重启
+
+76.如何永久关闭某个服务
+chkconfig [服务名] off
+
+77.查看磁盘空间的命令
+df -h
+
+78.查看所有CPU负荷
+top 命令、uptime 命令
+
+79.写出3种常见的磁盘阵列（RAID）级别并简述其特点和区别。
+raid0(条带模式):同一个文档分散存放在不同磁盘并行写入  特点:效率高,至少需要两块硬盘
+raid1(镜像模式):一个文档复制成多份,分别写入不同的磁盘 特点:多份拷贝提高可靠性,效率无提升,至少需要两块硬盘
+raid5(高性价比模式):RAID5不对存储的数据进行备份，而是把数据和相对应的奇偶校验信息存储到组成RAID5的各个磁盘上，并且奇偶校验信息和相对应的数据分别存储于不同的磁盘上  
+特点:当RAID5的一个磁盘数据发生损坏后，利用剩下的数据和相应的奇偶校验信息去恢复被损坏的数据
+
+80.请写出下列服务器使用的默认端口IIS/APACHE、SMTP、POP3、FTP、SSH、telnet、mysql、mssql、windows远程终端。
+IIS/APACHE:80
+SMTP:25
+POP3:110
+FTP:21
+SSH：22
+telnet：23
+mysql：3306
+mssql：1433
+windows远程终端：3389
